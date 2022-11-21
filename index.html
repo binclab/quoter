@@ -10,7 +10,7 @@
     <meta name="author" content="Bret Joseph Antonio">
     <title>Quoter</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="index.js"></script> 
+    <script src="index.js"></script>
 </head>
 
 <body>
@@ -29,7 +29,36 @@
     </div>
 
     <div id="Create" class="tabcontent">
-        <h1>Create</h1>
+        <h1>Customer Information</h1>
+        <form id="customerForm" action="" class="grid-container" method="get" autocomplete="on" style="row-gap: 16px;">
+            <div class="grid-item" style="grid-column: 1/span 2;">
+                <label for="firstname">First name:</label><br>
+                <input type="text" id="firstname" name="firstname" placeholder="John" required><br>
+                <label for="lastname">Last name:</label><br>
+                <input type="text" id="lastname" name="lastname" placeholder="Doe">
+            </div>
+            <div class="grid-item" style="grid-column: 3/span 2;">
+                <label for="phonenumber">Phone Number:</label><br>
+                <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="phonenumber" name="phonenumber" maxlength="8"
+                    placeholder="71234567">
+                <small>Format: 71234567</small><br>
+                <label for="lname">Whatsapp Number:</label><br>
+                <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="lname" name="lname" maxlength="8">
+                <small>Format: 71234567</small>
+            </div>
+            <div class="grid-item" style="grid-column: 5/span 2;">
+                <label for="fname">Email:</label><br>
+                <input type="email" id="fname" name="fname"><br>
+                <label for="lname">Location:</label><br>
+                <input type="text" id="lname" name="lname">
+            </div>
+            <input id="resetButton" type="reset" style="grid-column: 1/span 1;">
+            <button type="submit" style="grid-column: 5/span 1;">Submit</button>
+        </form>
+        <script>
+            var customerForm = document.querySelector("form#customerForm");
+            customerForm.addEventListener("submit", submitCustomerInformation);
+        </script>
     </div>
 
     <div id="Configuration" class="tabcontent">

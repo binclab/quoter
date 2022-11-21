@@ -1,48 +1,54 @@
- /* Style the navbar */
- #navbar {
-     overflow: hidden;
-     background-color: darkslategray;
- }
+#navbar {
+    overflow: hidden;
+    background-color: darkslategray;
+}
 
- /* Navbar links */
- #navbar button {
-     float: left;
-     display: block;
-     color: linen;
-     background-color: inherit;
-     text-align: center;
-     border: none;
-     outline: none;
-     cursor: pointer;
-     text-decoration: none;
-     padding: 14px 16px;
-     transition: 0.3s;
- }
+/* Navbar links */
+#navbar button {
+    float: left;
+    display: block;
+    color: linen;
+    background-color: inherit;
+    text-align: center;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
 
- #navbar button:hover {
-     background-color: lightslategray;
- }
+#navbar button:hover {
+    background-color: lightslategray;
+}
 
- /* Page content */
- .content {
-     padding: 16px;
- }
+/* Page content */
+.content {
+    padding: 16px;
+}
 
- /* The sticky class is added to the navbar with JS when it reaches its scroll position */
- .sticky {
-     position: fixed;
-     top: 0;
-     width: 100%;
- }
+/* The sticky class is added to the navbar with JS when it reaches its scroll position */
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
 
- /* Add some top padding to the page content to prevent sudden quick movement (as the navigation bar gets a new position at the top of the page (position:fixed and top:0) */
- .sticky+.content {
-     padding-top: 60px;
- }
+/* Add some top padding to the page content to prevent sudden quick movement (as the navigation bar gets a new position at the top of the page (position:fixed and top:0) */
+.sticky+.content {
+    padding-top: 60px;
+}
 
- .tabcontent {
-     display: none;
-     padding: 6px 12px;
-     border: 1px solid #ccc;
-     border-top: none;
- }
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid dimgray;
+    border-top: none;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    background-color: silver;
+    padding: 10px;
+}
