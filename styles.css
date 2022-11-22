@@ -3,7 +3,6 @@
     background-color: darkslategray;
 }
 
-/* Navbar links */
 #navbar button {
     float: left;
     display: block;
@@ -14,41 +13,64 @@
     outline: none;
     cursor: pointer;
     text-decoration: none;
-    padding: 14px 16px;
+    padding: 12px;
     transition: 0.3s;
 }
 
 #navbar button:hover {
+    background-color: dimgray;
+}
+
+#navbar button.active {
     background-color: lightslategray;
+}
+
+#quotationTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid dimgray;
+    font-size: 18px;
+    overflow-y: scroll;
+}
+
+#quotationTable th,
+#quotationTable td {
+    text-align: left;
+    padding: 12px;
+    width:30px;
+}
+
+#quotationTable tr {
+    border-bottom: 1px solid tomato;
+}
+
+#quotationTable tr.header,
+#quotationTable tr:hover {
+    background-color: #f1f1f1;
 }
 
 /* Page content */
 .content {
-    padding: 16px;
+    padding: 8px;
 }
 
-/* The sticky class is added to the navbar with JS when it reaches its scroll position */
 .sticky {
     position: fixed;
     top: 0;
     width: 100%;
 }
 
-/* Add some top padding to the page content to prevent sudden quick movement (as the navigation bar gets a new position at the top of the page (position:fixed and top:0) */
-.sticky+.content {
-    padding-top: 60px;
-}
-
 .tabcontent {
     display: none;
-    padding: 6px 12px;
+    padding: 8px;
     border: 1px solid dimgray;
     border-top: none;
+    height: 88vh;
 }
 
 .grid-container {
     display: grid;
     grid-template-columns: auto auto auto;
     background-color: silver;
-    padding: 10px;
+    padding: 4px;
 }

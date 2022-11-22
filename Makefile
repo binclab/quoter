@@ -1,4 +1,4 @@
 .PHONY: default
 
 default:
-	python -m http.server
+	python3 -m http.server
