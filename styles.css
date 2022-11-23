@@ -25,6 +25,11 @@
     background-color: lightslategray;
 }
 
+#dashboard button{
+    position: fixed;
+    right: 30px;
+}
+
 #quotationTable {
     border-collapse: collapse;
     width: 100%;

@@ -6,14 +6,25 @@ const years = ['2022'];
 function handleCredentialResponse(response) {
     // decodeJwtResponse() is a custom function defined by you
     // to decode the credential response.
-    const responsePayload = decodeJwtResponse(response.credential);
+    console.log(response);
+    const profile = decodeJwtResponse(response.credential);
+    if (profile.email == "rockshowholdings@gmail.com") {
+        document.getElementById(dashboard).style.display = "block";
+        console.log("sucsess");
+    } else {
+        google.accounts.id.disableAutoSelect();
+        alert("Use the correct Gmail Account!");
+    }
+}
 
-    console.log("ID: " + responsePayload.sub);
-    console.log('Full Name: ' + responsePayload.name);
-    console.log('Given Name: ' + responsePayload.given_name);
-    console.log('Family Name: ' + responsePayload.family_name);
-    console.log("Image URL: " + responsePayload.picture);
-    console.log("Email: " + responsePayload.email);
+function decodeJwtResponse(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
 }
 
 function openTab(event, tabName) {
@@ -42,7 +53,7 @@ async function submitCustomerInformation(event) {
     const data = new FormData(event.target);
     const value = data.get('firstname');
     console.log({ value });
-    openTab(event, "Manage");
+    openTab(event, "manage");
     document.getElementById("resetButton").click();
 }
 

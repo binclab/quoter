@@ -16,17 +16,21 @@
 
 <body>
     <div id="navbar">
-        <button class="tablinks active" onclick="openTab(event, 'Dashboard')">Dashboard</button>
-        <button class="tablinks" onclick="openTab(event, 'Manage')">Manage</button>
-        <button class="tablinks" onclick="openTab(event, 'Create')">Create</button>
-        <button class="tablinks" onclick="openTab(event, 'Configuration')" style="float: right;">Configuration</button>
+        <button class="tablinks active" onclick="openTab(event, 'dashboard')">Dashboard</button>
+        <button class="tablinks" onclick="openTab(event, 'manage')">Manage</button>
+        <button class="tablinks" onclick="openTab(event, 'create')">Create</button>
+        <button class="tablinks" onclick="openTab(event, 'configuration')" style="float: right;">Configuration</button>
     </div>
-    <div id="Dashboard" class="tabcontent">
-        <h2>Dashboard</h2>
+    <div id="dashboard" class="tabcontent">
+        <div style="display: flex;">
+            <h2>Dashboard</h2>
+            <button class="g_id_signout" style="align-self: center; margin-left: auto;">Sign Out</button>
+        </div>
         <hr>
     </div>
+    </div>
 
-    <div id="Manage" class="tabcontent">
+    <div id="manage" class="tabcontent">
         <h2>Quotations</h2>
         <hr>
         <div style="padding-left: 32px; padding-bottom: 4px">
@@ -61,7 +65,7 @@
         </div>
     </div>
 
-    <div id="Create" class="tabcontent">
+    <div id="create" class="tabcontent">
         <h2>Customer Information</h2>
         <hr>
         <form id="customerForm" action="" class="grid-container" method="get" autocomplete="on" style="row-gap: 16px;">
@@ -95,14 +99,14 @@
         </script>
     </div>
 
-    <div id="Configuration" class="tabcontent">
+    <div id="configuration" class="tabcontent">
         <h2>Configuration</h2>
         <hr>
     </div>
 
     <div id="g_id_onload" class="tabcontent" style="display: block;"
         data-client_id="154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com"
-        data-auto_select="true" data-callback="handleCredentialResponse">
+        data-callback="handleCredentialResponse">
     </div>
 </body>
 
