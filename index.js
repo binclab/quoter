@@ -1,3 +1,7 @@
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const years = ['2022'];
+
 function openTab(event, tabName) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -30,13 +34,18 @@ async function submitCustomerInformation(event) {
 
 function populateQuotationTable() {
     const table = document.getElementById("quotationTable");
-    const xmlhttp = new XMLHttpRequest();
-    xmlhttp.onload = function () {
-        const myArr = JSON.parse(this.responseText);
-        document.getElementById("demo").innerHTML = myArr[0];
+    const request = new XMLHttpRequest();
+    request.onload = function () {
+        //const data = JSON.parse(this.responseText);
+        //console.log(data.id);
     }
-    xmlhttp.open("GET", "json_demo_array.txt", true);
-    xmlhttp.send();
+    years.forEach(function (year) {
+        months.forEach(function (month) {
+            request.open("GET", "data/" + year + "/" + month + ".json", true);
+            if (request.status != 404)
+                request.send();
+        })
+    })
 }
 
 function filterQuotations() {
