@@ -1,12 +1,9 @@
-
 const CLIENT_ID = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
 
 function handleCredentialResponse(response) {
-    // decodeJwtResponse() is a custom function defined by you
-    // to decode the credential response.
-    console.log(response);
+    console.log("response");
     const profile = decodeJwtResponse(response.credential);
     if (profile.email == "rockshowholdings@gmail.com") {
         document.getElementById(dashboard).style.display = "block";
