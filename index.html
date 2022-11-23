@@ -12,6 +12,7 @@
     <title>Quoter</title>
     <link rel="stylesheet" href="styles.css">
     <script src="index.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -21,7 +22,16 @@
         <button class="tablinks" onclick="openTab(event, 'Create')">Create</button>
         <button class="tablinks" onclick="openTab(event, 'Configuration')" style="float: right;">Configuration</button>
     </div>
-    <div id="Dashboard" class="tabcontent" style="display: block;">
+    <div id="GoogleLogin" class="tabcontent" style="display: block;">
+        <div id="g_id_onload" data-client_id="154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com"
+            data-context="signin" data-ux_mode="popup" data-callback="switchTo()" data-itp_support="true">
+        </div>
+
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+            data-text="signin_with" data-size="large" data-locale="en-GB" data-logo_alignment="left">
+        </div>
+    </div>
+    <div id="Dashboard" class="tabcontent">
         <h2>Dashboard</h2>
         <hr>
     </div>
