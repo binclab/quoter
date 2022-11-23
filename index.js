@@ -14,10 +14,14 @@ function handleCredentialResponse(response) {
 }
 
 function signOut(){
-    console.log("sigj")
+    console.log("sigj");
     document.getElementById("g_id_onload").style.display = "block";
     google.accounts.id.disableAutoSelect(); 
     return true;
+}
+
+function refreshPage() {
+    window.location.reload();
 }
 
 function decodeJwtResponse(token) {
