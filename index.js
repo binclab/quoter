@@ -6,7 +6,7 @@ function handleCredentialResponse(response) {
     console.log("response");
     const profile = decodeJwtResponse(response.credential);
     if (profile.email == "rockshowholdings@gmail.com") {
-        document.getElementById(dashboard).style.display = "block";
+        document.getElementById("dashboard").style.display = "block";
         console.log("sucsess");
     } else {
         google.accounts.id.disableAutoSelect();
