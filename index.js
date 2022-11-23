@@ -7,11 +7,17 @@ function handleCredentialResponse(response) {
     const profile = decodeJwtResponse(response.credential);
     if (profile.email == "rockshowholdings@gmail.com") {
         document.getElementById("dashboard").style.display = "block";
-        console.log("sucsess");
     } else {
         google.accounts.id.disableAutoSelect();
         alert("Use the correct Gmail Account!");
     }
+}
+
+function signOut(){
+    console.log("sigj")
+    document.getElementById("g_id_onload").style.display = "block";
+    google.accounts.id.disableAutoSelect(); 
+    return true;
 }
 
 function decodeJwtResponse(token) {
