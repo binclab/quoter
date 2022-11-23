@@ -1,6 +1,20 @@
 
+const CLIENT_ID = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
+
+function handleCredentialResponse(response) {
+    // decodeJwtResponse() is a custom function defined by you
+    // to decode the credential response.
+    const responsePayload = decodeJwtResponse(response.credential);
+
+    console.log("ID: " + responsePayload.sub);
+    console.log('Full Name: ' + responsePayload.name);
+    console.log('Given Name: ' + responsePayload.given_name);
+    console.log('Family Name: ' + responsePayload.family_name);
+    console.log("Image URL: " + responsePayload.picture);
+    console.log("Email: " + responsePayload.email);
+}
 
 function openTab(event, tabName) {
     // Declare all variables
@@ -99,5 +113,28 @@ function sortQuotationTable() {
             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
             switching = true;
         }
+    }
+}
+
+function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+}
+
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined later
+    });
+    gisInited = true;
+    maybeEnableButtons();
+}
+
+/**
+ * Enables user interaction after all libraries are loaded.
+ */
+function maybeEnableButtons() {
+    if (gapiInited && gisInited) {
+        document.getElementById('authorize_button').style.visibility = 'visible';
     }
 }
