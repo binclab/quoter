@@ -1,11 +1,35 @@
-const CLIENT_ID = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
+const client_id = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
+var profile;
+
+function setupGoogleLogin() {
+    profile = JSON.parse(localStorage.googleToken);
+    google.accounts.id.initialize({
+        client_id: client_id,
+        auto_select: false,
+        callback: handleCredentialResponse,
+        context: "signin",
+        itp_support: true
+    });
+    google.accounts.id.renderButton(
+        document.getElementById("googleLogin"),
+        { shape: "pill" }
+    );
+    if (profile.email == "rockshowholdings@gmail.com") {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("content").style.display = "block";
+        document.getElementById("dashboard").style.display = "block";
+        //google.accounts.id.prompt();
+    }
+}
 
 function handleCredentialResponse(response) {
-    console.log("response");
-    const profile = decodeJwtResponse(response.credential);
+    profile = decodeJwtResponse(response.credential);
     if (profile.email == "rockshowholdings@gmail.com") {
+        localStorage.googleToken = JSON.stringify(profile);
+        document.getElementById("login").style.display = "none";
+        document.getElementById("content").style.display = "block";
         document.getElementById("dashboard").style.display = "block";
     } else {
         google.accounts.id.disableAutoSelect();
@@ -13,15 +37,16 @@ function handleCredentialResponse(response) {
     }
 }
 
-function signOut(){
-    console.log("sigj");
-    document.getElementById("g_id_onload").style.display = "block";
-    google.accounts.id.disableAutoSelect(); 
-    return true;
+function signOut() {
+    //document.getElementById("g_id_onload").style.display = "block";
+    //google.accounts.id.disableAutoSelect(); 
+    //return true;
 }
 
 function refreshPage() {
-    window.location.reload();
+
+    console.log("sigj");
+    //window.location.reload();
 }
 
 function decodeJwtResponse(token) {
@@ -36,7 +61,7 @@ function decodeJwtResponse(token) {
 
 function openTab(event, tabName) {
     // Declare all variables
-    var i, tabcontent, tablinks;
+    var i, tabcontent, navbuttons;
 
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
@@ -44,10 +69,9 @@ function openTab(event, tabName) {
         tabcontent[i].style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    navbuttons = document.getElementsByClassName("navbuttons");
+    for (i = 0; i < navbuttons.length; i++) {
+        navbuttons[i].className = navbuttons[i].className.replace(" active", "");
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab

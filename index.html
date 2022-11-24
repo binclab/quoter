@@ -11,100 +11,124 @@
     <title>Quoter</title>
     <link rel="stylesheet" href="styles.css">
     <script src="index.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
-    <div id="navbar">
-        <button class="tablinks active" onclick="openTab(event, 'dashboard')">Dashboard</button>
-        <button class="tablinks" onclick="openTab(event, 'manage')">Manage</button>
-        <button class="tablinks" onclick="openTab(event, 'create')">Create</button>
-        <button class="tablinks" onclick="openTab(event, 'configuration')" style="float: right;">Configuration</button>
+    <div id="login" class="center">
+        <div id="googleLogin"></div>
     </div>
-    <div id="dashboard" class="tabcontent">
-        <div style="display: flex;">
-            <h2>Dashboard</h2>
-            <button style="align-self: center; margin-left: auto;" onclick="signOut">Sign Out</button>
-        </div>
-        <hr>
-    </div>
-    </div>
-
-    <div id="manage" class="tabcontent">
-        <h2>Quotations</h2>
-        <hr>
-        <div style="padding-left: 32px; padding-bottom: 4px">
-            <input type="text" id="quotationSearch" onkeyup="filterQuotations()"
-                placeholder="Search for a quotation ..." title="Type in a or number">
-        </div>
-        <table id="quotationTable">
-            <tr class="header">
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Contacts</th>
-                <th>Date of Entry</th>
-                <th>Status</th>
-            </tr>
-            <script>
-                populateQuotationTable();
-            </script>
-        </table>
-        <div class="grid-item" style="padding-top: 8px">
-            <label for="sorter">Sort table by:</label>
-            <select name="sorter" id="sorter">
-                <optgroup label="Date">
-                    <option value="ascending">Ascending Date</option>
-                    <option value="descending">Descending Date</option>
-                </optgroup>
-                <optgroup label="Status">
-                    <option value="ascending">Ascending Status</option>
-                    <option value="descending">Descending Status</option>
-                </optgroup>
-            </select>
-            <button onclick="sortQuotationTable()">Sort</button>
-        </div>
-    </div>
-
-    <div id="create" class="tabcontent">
-        <h2>Customer Information</h2>
-        <hr>
-        <form id="customerForm" action="" class="grid-container" method="get" autocomplete="on" style="row-gap: 16px;">
-            <div class="grid-item" style="grid-column: 1/span 2;">
-                <label for="firstname">First name:</label><br>
-                <input type="text" id="firstname" name="firstname" placeholder="John" required><br>
-                <label for="lastname">Last name:</label><br>
-                <input type="text" id="lastname" name="lastname" placeholder="Doe">
+    <div id="content" style="display: none;">
+        <nav id="navbar" style="overflow: hidden; background-color: darkslategray; 
+            position: fixed; top: 0; width: 100%;">
+            <button class="navbuttons active" onclick="openTab(event, 'dashboard')">Dashboard</button>
+            <button class="navbuttons" onclick="openTab(event, 'manage')">Manage</button>
+            <button class="navbuttons" onclick="openTab(event, 'create')">Create</button>
+            <button class="navbuttons" onclick="openTab(event, 'configuration')"
+                style="float:right;">Configuration</button>
+        </nav>
+        <div id="dashboard" class="tabcontent">
+            <div style="position: fixed;margin-right: 16px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <h2>Dashboard</h2>
+                    <div style=" display: flex; justify-content: center; align-items: center;">
+                        <button id="logoutButton" class="g_id_signout" type="button" onclick="refreshPage()" style="
+                            align-items: center; justify-content: space-evenly; display: flex;
+                            border: 1px solid darkgray; width: 100px; height: 32px; padding: 4px;
+                            background-color: white; border-radius: 32px; text-align: center;">
+                            <p>Logout</p><svg version="1.1" style="height: 16px;" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 48 48">
+                                <g>
+                                    <path fill="#EA4335"
+                                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
+                                    </path>
+                                    <path fill="#4285F4"
+                                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z">
+                                    </path>
+                                    <path fill="#FBBC05"
+                                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z">
+                                    </path>
+                                    <path fill="#34A853"
+                                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z">
+                                    </path>
+                                    <path fill="none" d="M0 0h48v48H0z"></path>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <hr>
             </div>
-            <div class="grid-item" style="grid-column: 3/span 2;">
-                <label for="phonenumber">Phone Number:</label><br>
-                <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="phonenumber" name="phonenumber" maxlength="8"
-                    placeholder="71234567">
-                <small>Format: 71234567</small><br>
-                <label for="lname">Whatsapp Number:</label><br>
-                <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="lname" name="lname" maxlength="8">
-                <small>Format: 71234567</small>
-            </div>
-            <div class="grid-item" style="grid-column: 5/span 2;">
-                <label for="fname">Email:</label><br>
-                <input type="email" id="fname" name="fname"><br>
-                <label for="lname">Location:</label><br>
-                <input type="text" id="lname" name="lname">
-            </div>
-            <input id="resetButton" type="reset" style="grid-column: 1/span 1;">
-            <button type="submit" style="grid-column: 5/span 1;">Submit</button>
-        </form>
-        <script>
-            var customerForm = document.querySelector("form#customerForm");
-            customerForm.addEventListener("submit", submitCustomerInformation);
-        </script>
-    </div>
+        </div>
 
-    <div id="configuration" class="tabcontent">
-        <h2>Configuration</h2>
-        <hr>
-    </div>
+        <div id="manage" class="tabcontent">
+            <h2>Quotations</h2>
+            <hr>
+            <div style="padding-left: 32px; padding-bottom: 4px">
+                <input type="text" id="quotationSearch" onkeyup="filterQuotations()"
+                    placeholder="Search for a quotation ..." title="Type in a or number">
+            </div>
+            <table id="quotationTable">
+                <tr class="header">
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Contacts</th>
+                    <th>Date of Entry</th>
+                    <th>Status</th>
+                </tr>
+            </table>
+            <div class="grid-item" style="padding-top: 8px">
+                <label for="sorter">Sort table by:</label>
+                <select name="sorter" id="sorter">
+                    <optgroup label="Date">
+                        <option value="ascending">Ascending Date</option>
+                        <option value="descending">Descending Date</option>
+                    </optgroup>
+                    <optgroup label="Status">
+                        <option value="ascending">Ascending Status</option>
+                        <option value="descending">Descending Status</option>
+                    </optgroup>
+                </select>
+                <button onclick="sortQuotationTable()">Sort</button>
+            </div>
+        </div>
 
-    <div id="g_id_onload" class="tabcontent" style="display: block;"
+        <div id="create" class="tabcontent">
+            <h2>Customer Information</h2>
+            <hr>
+            <form id="customerForm" action="" class="grid-container" method="get" autocomplete="on"
+                style="row-gap: 16px;">
+                <div class="grid-item" style="grid-column: 1/span 2;">
+                    <label for="firstname">First name:</label><br>
+                    <input type="text" id="firstname" name="firstname" placeholder="John" required><br>
+                    <label for="lastname">Last name:</label><br>
+                    <input type="text" id="lastname" name="lastname" placeholder="Doe">
+                </div>
+                <div class="grid-item" style="grid-column: 3/span 2;">
+                    <label for="phonenumber">Phone Number:</label><br>
+                    <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="phonenumber" name="phonenumber" maxlength="8"
+                        placeholder="71234567">
+                    <small>Format: 71234567</small><br>
+                    <label for="lname">Whatsapp Number:</label><br>
+                    <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="lname" name="lname" maxlength="8">
+                    <small>Format: 71234567</small>
+                </div>
+                <div class="grid-item" style="grid-column: 5/span 2;">
+                    <label for="fname">Email:</label><br>
+                    <input type="email" id="fname" name="fname"><br>
+                    <label for="lname">Location:</label><br>
+                    <input type="text" id="lname" name="lname">
+                </div>
+                <input id="resetButton" type="reset" style="grid-column: 1/span 1;">
+                <button type="submit" style="grid-column: 5/span 1;">Submit</button>
+            </form>
+        </div>
+
+        <div id="configuration" class="tabcontent">
+            <h2>Configuration</h2>
+            <hr>
+        </div>
+
+        <!--div id="g_id_onload" class="tabcontent" style="display: block;"
         data-client_id="154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com"
         data-callback="handleCredentialResponse" data-auto_prompt="true" data-auto_select="true">
         <div class="center">
@@ -128,8 +152,15 @@
                     </g>
                 </svg>
             </button>
-        </div>
+        </div-->
     </div>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        var customerForm = document.querySelector("form#customerForm");
+        customerForm.addEventListener("submit", submitCustomerInformation);
+        populateQuotationTable();
+        window.onload = setupGoogleLogin;
+    </script>
 </body>
 
 </html>

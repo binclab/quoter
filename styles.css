@@ -1,9 +1,4 @@
-#navbar {
-    overflow: hidden;
-    background-color: darkslategray;
-}
-
-#navbar button {
+.navbuttons {
     float: left;
     display: block;
     color: linen;
@@ -17,17 +12,12 @@
     transition: 0.3s;
 }
 
-#navbar button:hover {
+.navbuttons:hover {
     background-color: dimgray;
 }
 
-#navbar button.active {
+.navbuttons.active {
     background-color: lightslategray;
-}
-
-#dashboard button {
-    position: fixed;
-    right: 30px;
 }
 
 #quotationTable {
@@ -66,10 +56,8 @@
 
 .tabcontent {
     display: none;
+    margin-top: 25px;
     padding: 8px;
-    border: 1px solid dimgray;
-    border-top: none;
-    height: 88vh;
 }
 
 .grid-container {
@@ -87,25 +75,13 @@
     justify-content: center;
 }
 
-button#loginButton {
-    align-items: center;
-    justify-content: space-around;
-    display: flex;
-    border: 1px solid darkgray;
-    width: 200px;
-    padding: 4px;
-    background-color: white;
-    border-radius: 32px;
-    text-align: center;
-}
-
-button#loginButton:hover {
+button#logoutButton:hover {
     border: 1px solid lightgray;
     background-color: ghostwhite;
 }
 
-button#loginButton:active {
+button#logoutButton:active {
     background: darkseagreen;
     box-shadow: 2px 3px 1px 3px darkolivegreen, 4px 7px 3px 6px darkkhaki;
     transition: all 0.8s
-  }
+}
