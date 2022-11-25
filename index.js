@@ -4,7 +4,6 @@ const years = ['2022'];
 var profile;
 
 function setupGoogleLogin() {
-    profile = JSON.parse(localStorage.googleToken);
     google.accounts.id.initialize({
         client_id: client_id,
         auto_select: false,
@@ -16,7 +15,9 @@ function setupGoogleLogin() {
         document.getElementById("googleLogin"),
         { shape: "pill" }
     );
-    if (profile.email == "rockshowholdings@gmail.com") {
+
+    if (localStorage.googleToken != null) {
+        profile = JSON.parse(localStorage.googleToken);
         document.getElementById("login").style.display = "none";
         document.getElementById("content").style.display = "block";
         document.getElementById("dashboard").style.display = "block";
@@ -27,7 +28,7 @@ function setupGoogleLogin() {
 function handleCredentialResponse(response) {
     profile = decodeJwtResponse(response.credential);
     if (profile.email == "rockshowholdings@gmail.com") {
-        localStorage.googleToken = JSON.stringify(profile);
+        localStorage.setItem("googleToken", JSON.stringify(profile));
         document.getElementById("login").style.display = "none";
         document.getElementById("content").style.display = "block";
         document.getElementById("dashboard").style.display = "block";
@@ -38,9 +39,8 @@ function handleCredentialResponse(response) {
 }
 
 function signOut() {
-    //document.getElementById("g_id_onload").style.display = "block";
-    //google.accounts.id.disableAutoSelect(); 
-    //return true;
+    profile = null;
+    localStorage.setItem("googleToken", profile);
 }
 
 function refreshPage() {
