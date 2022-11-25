@@ -1,7 +1,7 @@
 const client_id = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
-var profile;
+var profile = localStorage.googleToken;
 
 function setupGoogleLogin() {
     google.accounts.id.initialize({
@@ -15,13 +15,15 @@ function setupGoogleLogin() {
         document.getElementById("googleLogin"),
         { shape: "pill" }
     );
-
-    if (localStorage.googleToken != null) {
+    
+    if (profile != 'null') {
         profile = JSON.parse(localStorage.googleToken);
-        document.getElementById("login").style.display = "none";
-        document.getElementById("content").style.display = "block";
-        document.getElementById("dashboard").style.display = "block";
-        //google.accounts.id.prompt();
+        if (profile.email == "rockshowholdings@gmail.com") {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("content").style.display = "block";
+            document.getElementById("dashboard").style.display = "block";
+            //google.accounts.id.prompt();
+        }
     }
 }
 
@@ -38,9 +40,11 @@ function handleCredentialResponse(response) {
     }
 }
 
-function signOut() {
+function logout() {
     profile = null;
-    localStorage.setItem("googleToken", profile);
+    localStorage.googleToken = null;
+    document.getElementById("login").style.display = "flex";
+    document.getElementById("content").style.display = "none";
 }
 
 function refreshPage() {
@@ -50,13 +54,12 @@ function refreshPage() {
 }
 
 function decodeJwtResponse(token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+    var data = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    var string = decodeURIComponent(window.atob(data).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 
-    return JSON.parse(jsonPayload);
+    return JSON.parse(string);
 }
 
 function openTab(event, tabName) {
