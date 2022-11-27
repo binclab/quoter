@@ -1,15 +1,17 @@
-const client_id = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
-const api_key = 'AIzaSyC3YgQLAAKnpUAvCCZokePbvZGRGiy06rs';
-const scopes = 'https://www.googleapis.com/auth/drive';
-const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+//const client_id = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
+//const api_key = 'AIzaSyC3YgQLAAKnpUAvCCZokePbvZGRGiy06rs';
+//const scopes = 'https://www.googleapis.com/auth/drive';
+//const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
+const id = "106525389156823461102";
 var profile = localStorage.googleToken;
 let tokenClient;
+var execute;
 
 function setupGoogleLogin() {
-    /*google.accounts.id.initialize({
-        client_id: client_id,
+    execute = google.accounts.id.initialize({
+        client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
         auto_select: false,
         callback: handleCredentialResponse,
         context: "signin",
@@ -18,17 +20,16 @@ function setupGoogleLogin() {
     google.accounts.id.renderButton(
         document.getElementById("googleLogin"),
         { shape: "pill" }
-    );*/
+    );
 
+    /*
     tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: client_id,
-        scope: SCOPES,
-        callback: '', // defined later
-    });
-    gisInited = true;
-    maybeEnableButtons();
+        client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
+        scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive',
+        callback: '',
+    });*/
 
-    if (profile != 'null') {
+    if (profile !== 'null') {
         profile = JSON.parse(localStorage.googleToken);
         if (profile.email == "rockshowholdings@gmail.com") {
             document.getElementById("login").style.display = "none";
@@ -42,12 +43,53 @@ function setupGoogleLogin() {
 function setupGoogleDrive() {
     gapi.load('client', async function () {
         await gapi.client.init({
-            apiKey: api_key,
-            discoveryDocs: [DISCOVERY_DOC],
+            apiKey: 'AIzaSyDtkyr1CEHyR_doXiwV2sUTwHT9Xv85RO8',
+            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
         });
-        gapiInited = true;
-        maybeEnableButtons();
     });
+}
+
+function login() {
+    var url = 'https://www.googleapis.com/oauth2/v2/userinfo?access_token=';
+    tokenClient.callback = async (response) => {
+        const token = response.access_token;
+        fetch(url + token, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        }).then(response => response.json()).then(json => {
+            console.log(json.id === id);
+            if (json.id === id) {
+                profile = json;
+                profile.token = token;
+                localStorage.profile = JSON.stringify(profile);
+                document.getElementById("login").style.display = "none";
+                document.getElementById("content").style.display = "block";
+                document.getElementById("dashboard").style.display = "block";
+            } else {
+                alert("Use the Rock Show Gmail Account!");
+            }
+        });
+
+        if (response.error !== undefined) {
+            throw (response);
+        }
+        //await listFiles();
+    };
+
+    if (gapi.client.getToken() === null) {
+        // Prompt the user to select a Google Account and ask for consent to share their data
+        // when establishing a new session.
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+        // Skip display of account chooser and consent dialog for an existing session.
+        tokenClient.requestAccessToken({ prompt: '' });
+    }
+}
+
+async function handleLogin(response) {
+    console.log(response);
 }
 
 function handleCredentialResponse(response) {
@@ -66,7 +108,7 @@ function handleCredentialResponse(response) {
 function logout() {
     const token = gapi.client.getToken();
     profile = null;
-    localStorage.googleToken = null;
+    localStorage.profile = null;
     if (token !== null) {
         google.accounts.oauth2.revoke(token.access_token);
         gapi.client.setToken('');
@@ -186,28 +228,5 @@ function sortQuotationTable() {
             rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
             switching = true;
         }
-    }
-}
-
-function gapiLoaded() {
-    gapi.load('client', initializeGapiClient);
-}
-
-function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // defined later
-    });
-    gisInited = true;
-    maybeEnableButtons();
-}
-
-/**
- * Enables user interaction after all libraries are loaded.
- */
-function maybeEnableButtons() {
-    if (gapiInited && gisInited) {
-        document.getElementById('authorize_button').style.visibility = 'visible';
     }
 }
