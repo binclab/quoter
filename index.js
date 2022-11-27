@@ -1,10 +1,14 @@
 const client_id = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
+const api_key = 'AIzaSyC3YgQLAAKnpUAvCCZokePbvZGRGiy06rs';
+const scopes = 'https://www.googleapis.com/auth/drive';
+const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
 var profile = localStorage.googleToken;
+let tokenClient;
 
 function setupGoogleLogin() {
-    google.accounts.id.initialize({
+    /*google.accounts.id.initialize({
         client_id: client_id,
         auto_select: false,
         callback: handleCredentialResponse,
@@ -14,8 +18,16 @@ function setupGoogleLogin() {
     google.accounts.id.renderButton(
         document.getElementById("googleLogin"),
         { shape: "pill" }
-    );
-    
+    );*/
+
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: client_id,
+        scope: SCOPES,
+        callback: '', // defined later
+    });
+    gisInited = true;
+    maybeEnableButtons();
+
     if (profile != 'null') {
         profile = JSON.parse(localStorage.googleToken);
         if (profile.email == "rockshowholdings@gmail.com") {
@@ -25,6 +37,17 @@ function setupGoogleLogin() {
             //google.accounts.id.prompt();
         }
     }
+}
+
+function setupGoogleDrive() {
+    gapi.load('client', async function () {
+        await gapi.client.init({
+            apiKey: api_key,
+            discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+    });
 }
 
 function handleCredentialResponse(response) {
@@ -41,15 +64,20 @@ function handleCredentialResponse(response) {
 }
 
 function logout() {
+    const token = gapi.client.getToken();
     profile = null;
     localStorage.googleToken = null;
+    if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+    }
     document.getElementById("login").style.display = "flex";
     document.getElementById("content").style.display = "none";
 }
 
-function refreshPage() {
+function refreshPage(data) {
 
-    console.log("sigj");
+    console.log(data);
     //window.location.reload();
 }
 
