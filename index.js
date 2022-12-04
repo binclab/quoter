@@ -1,6 +1,8 @@
+const endpoint = "https://oauth2.googleapis.com/";
 const client_id = '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com';
 const api_key = 'AIzaSyDtkyr1CEHyR_doXiwV2sUTwHT9Xv85RO8';
 const client_secret = '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';
+const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const redirect_uri = "localhost:8000"
 //const scopes = 'https://www.googleapis.com/auth/drive';
 //const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
@@ -10,11 +12,13 @@ const sub = "106525389156823461102";
 var profile = {};
 
 function setupLogin() {
-    document.getElementById("googleImage").setAttribute("class", "spin");
+    if (window.location.href.split('?')[1] === undefined) {
+        document.getElementById("loginButton").style.display = "flex";
+        document.getElementById("googleImage").setAttribute("class", "spin");
+    }
     try {
         const array = window.location.href.split('?')[1].split('&')[0].split('=');
-        if (array[0] == "code" && array[1] !== null) {
-            const endpoint = "https://oauth2.googleapis.com/";
+        if (array[0] === "code" && array[1] !== null) {
             fetch(endpoint + "token?grant_type=authorization_code&client_id=" +
                 client_id + "&client_secret=" + client_secret + "&redirect_uri=http%3A//" +
                 redirect_uri + "&code=" + array[1], {
@@ -30,182 +34,89 @@ function setupLogin() {
                     profile.sub = json.sub;
                     if (profile.sub === sub) {
                         localStorage.profile = JSON.stringify(profile);
+                        document.getElementById("login").style.display = "none";
+                        document.getElementById("content").style.display = "block";
+                        document.getElementById("dashboard").style.display = "block";
                     } else {
                         alert("Use the Rock Show Gmail Account!");
                     }
-                    window.location = "http://localhost:8000";
                 });
             });
         }
     } catch (error) { }
-    finally {
+}
 
-        //}
-        //if(code !== null && code[1].split('&') === 'code')
-        //    code = code[1].split('&');
-        //[0].split('=')[1]
-        //window.location.href.split('?')[1].split('&')[0].split('=')[1]
+function setupDashboard() {
+    profile = JSON.parse(localStorage.profile);
+    document.getElementById("login").style.display = "none";
+    document.getElementById("content").style.display = "block";
+    document.getElementById("dashboard").style.display = "block";
+    try {
+        fetch(endpoint + "tokeninfo?id_token=" + profile.id_token, {
+            method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
+        }).then(response => response.json()).then(json => {
+            if (json.error === "invalid_token") {
+                fetch(endpoint + "token?grant_type=refresh_token&client_id=" + client_id +
+                    "&client_secret=" + client_secret + "&refresh_token=" + profile.refresh_token, {
+                    method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
+                }).then(response => response.json()).then(json => {
+                    profile.access_token = json.access_token;
+                    profile.id_token = json.id_token;
+                    localStorage.profile = JSON.stringify(profile);
+                });
+            }
+            setupGoogleDrive();
+        });
+
+    } catch (error) { }
+    finally {
+        //getFiles();
     }
 }
 
-function setupDashboard(){
-    alert("daaa");
-}
-
-function setupGoogleLogin() {
-    google.accounts.id.initialize({
-        client_id: client_id,
-        auto_select: false,
-        callback: handleCredentialResponse,
-        context: "signin",
-        itp_support: true
-    });
-    google.accounts.id.renderButton(
-        document.getElementById("googleLogin"),
-        { shape: "pill" }
-    );
-
-    /*
-    fetch(url + token, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        },
-    }).then(response => response.json()).then(json => {
-        console.log(json.id === id);
-        if (json.id === id) {
-            profile = json;
-            profile.token = token;
-            localStorage.profile = JSON.stringify(profile);
-            document.getElementById("login").style.display = "none";
-            document.getElementById("content").style.display = "block";
-            document.getElementById("dashboard").style.display = "block";
-        } else {
-            alert("Use the Rock Show Gmail Account!");
-        }
-    });
-    */
-
-    /*tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
-        scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive',
-        callback: 'handleLogin',
-    });*/
-    /*
- 
-    if (profile !== 'null') {
-        profile = JSON.parse(localStorage.googleToken);
-        if (profile.email == "rockshowholdings@gmail.com") {
-            document.getElementById("login").style.display = "none";
-            document.getElementById("content").style.display = "block";
-            document.getElementById("dashboard").style.display = "block";
-            //google.accounts.id.prompt();
-        }
-    }*/
-}
-
-function setupGoogleDrive() {
-    /*gapi.load('client', async function () {
-        await gapi.client.init({
-            client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
-            apiKey: 'AIzaSyDtkyr1CEHyR_doXiwV2sUTwHT9Xv85RO8',
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-            scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive',
-        }).then(function () {
-            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-            updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get())
-        });
-    });*/
-}
-
 function login() {
-
     window.location = "https://accounts.google.com/o/oauth2/v2/auth?" +
         "response_type=code&include_granted_scopes=true&access_type=offline&" +
         "client_id=" + client_id + "&redirect_uri=http%3A//" + redirect_uri + "&" +
         "scope=https%3A%2F%2Fwww.googleapis.com/auth/drive%20openid%20profile%20email&" +
         "login_hint=rockshowholdings";
-
-    /*
-    window.open("https://accounts.google.com/o/oauth2/v2/auth?" +
-        "response_type=code&" +
-        "client_id=167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com&" +
-        "scope=openid%20email%20https://www.googleapis.com/auth/drive&" +
-        "redirect_uri=http%3A//localhost:8000&" +
-        "login_hint=jsmith@example.com&" +
-        "nonce=0394852-3190485-2490358&");*/
-    /*
-    var url = 'https://www.googleapis.com/oauth2/v2/userinfo?access_token=';
-    tokenClient.callback = async (response) => {
-        const token = response.access_token;
-        fetch(url + token, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            },
-        }).then(response => response.json()).then(json => {
-            console.log(json.id === id);
-            if (json.id === id) {
-                profile = json;
-                profile.token = token;
-                localStorage.profile = JSON.stringify(profile);
-                document.getElementById("login").style.display = "none";
-                document.getElementById("content").style.display = "block";
-                document.getElementById("dashboard").style.display = "block";
-            } else {
-                alert("Use the Rock Show Gmail Account!");
-            }
-        });
- 
-        if (response.error !== undefined) {
-            throw (response);
-        }
-        //await listFiles();*/
-
-    /*if (gapi.client.getToken() === null) {
-        // Prompt the user to select a Google Account and ask for consent to share their data
-        // when establishing a new session.
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-    } else {
-        // Skip display of account chooser and consent dialog for an existing session.
-        tokenClient.requestAccessToken({ prompt: '' });
-    }*/
-}
-
-function handleCredentialResponse(response) {
-    console.log('response');
-    profile = decodeJwtResponse(response.credential);
-    if (profile.email == "rockshowholdings@gmail.com") {
-        localStorage.setItem("googleToken", JSON.stringify(profile));
-        document.getElementById("login").style.display = "none";
-        document.getElementById("content").style.display = "block";
-        document.getElementById("dashboard").style.display = "block";
-    } else {
-        google.accounts.id.disableAutoSelect();
-        alert("Use the correct Gmail Account!");
-    }
 }
 
 function logout() {
-    profile = {};
     localStorage.removeItem("profile");
+    profile = {};
     document.getElementById("login").style.display = "flex";
     document.getElementById("content").style.display = "none";
+    document.getElementById("loginButton").style.display = "flex";
+    document.getElementById("googleImage").setAttribute("class", "spin");
 }
 
-function refreshPage(data) {
-
-    console.log(data);
-    //window.location.reload();
+async function setupGoogleDrive() {
+    gapi.load('client', await gapi.client.init({
+        apiKey: api_key,
+        discoveryDocs: [discovery_docs],
+    }));
 }
 
-function decodeJwtResponse(token) {
-    var data = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    var string = decodeURIComponent(window.atob(data).split('').map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+async function initializeGapiClient() {
+    /*
+    try {
+        fetch("https://www.googleapis.com/drive/v3/files" + "tokeninfo?id_token=" + profile.id_token, {
+            method: 'GET', headers: { 'Accept': 'application/x-www-form-urlencoded' }
+        }).then(response => response.json()).then(json => {
+            if (json.error === "invalid_token") {
+                fetch(endpoint + "token?grant_type=refresh_token&client_id=" + client_id +
+                    "&client_secret=" + client_secret + "&refresh_token=" + profile.refresh_token, {
+                    method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
+                }).then(response => response.json()).then(json => {
+                    profile.access_token = json.access_token;
+                    profile.id_token = json.id_token;
+                    localStorage.profile = JSON.stringify(profile);
+                });
+            }
+        });
 
-    return JSON.parse(string);
+    } catch (error) { }*/
 }
 
 function openTab(event, tabName) {
