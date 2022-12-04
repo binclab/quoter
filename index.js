@@ -1,21 +1,44 @@
-//const client_id = '154585617419-leljq0gg7ahs5ggcgd89ou80457siksn.apps.googleusercontent.com';
-//const api_key = 'AIzaSyC3YgQLAAKnpUAvCCZokePbvZGRGiy06rs';
+const client_id = '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com';
+const api_key = 'AIzaSyDtkyr1CEHyR_doXiwV2sUTwHT9Xv85RO8';
+const client_secret = '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';
+const redirect_uri = "localhost:8000"
 //const scopes = 'https://www.googleapis.com/auth/drive';
 //const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const years = ['2022'];
-const id = "106525389156823461102";
-var profile = localStorage.googleToken;
-let tokenClient;
-var execute;
+const sub = "106525389156823461102";
+var profile = {};
 
 function setupLogin() {
-    let code = null;
+    document.getElementById("googleImage").setAttribute("class", "spin");
     try {
-        const array = code = window.location.href.split('?')[1].split('&')[0].split('=');
-        if (array[0] == "code")
-            code = array[1];
-    } finally {
+        const array = window.location.href.split('?')[1].split('&')[0].split('=');
+        if (array[0] == "code" && array[1] !== null) {
+            const endpoint = "https://oauth2.googleapis.com/";
+            fetch(endpoint + "token?grant_type=authorization_code&client_id=" +
+                client_id + "&client_secret=" + client_secret + "&redirect_uri=http%3A//" +
+                redirect_uri + "&code=" + array[1], {
+                method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' },
+            }).then(response => response.json()).then(json => {
+                profile.access_token = json.access_token;
+                profile.id_token = json.id_token;
+                profile.refresh_token = json.refresh_token;
+                fetch(endpoint + "tokeninfo?id_token=" + json.id_token, {
+                    method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
+                }).then(response => response.json()).then(json => {
+                    profile.email = json.email;
+                    profile.sub = json.sub;
+                    if (profile.sub === sub) {
+                        localStorage.profile = JSON.stringify(profile);
+                    } else {
+                        alert("Use the Rock Show Gmail Account!");
+                    }
+                    window.location = "http://localhost:8000";
+                });
+            });
+        }
+    } catch (error) { }
+    finally {
 
         //}
         //if(code !== null && code[1].split('&') === 'code')
@@ -25,10 +48,13 @@ function setupLogin() {
     }
 }
 
+function setupDashboard(){
+    alert("daaa");
+}
 
 function setupGoogleLogin() {
     google.accounts.id.initialize({
-        client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
+        client_id: client_id,
         auto_select: false,
         callback: handleCredentialResponse,
         context: "signin",
@@ -95,12 +121,10 @@ function setupGoogleDrive() {
 function login() {
 
     window.location = "https://accounts.google.com/o/oauth2/v2/auth?" +
-        "response_type=code&" +
-        "client_id=167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com&" +
-        "scope=openid%20email%20https://www.googleapis.com/auth/drive&" +
-        "redirect_uri=http%3A//localhost:8000&" +
-        "login_hint=jsmith@example.com&" +
-        "nonce=0394852-3190485-2490358&";
+        "response_type=code&include_granted_scopes=true&access_type=offline&" +
+        "client_id=" + client_id + "&redirect_uri=http%3A//" + redirect_uri + "&" +
+        "scope=https%3A%2F%2Fwww.googleapis.com/auth/drive%20openid%20profile%20email&" +
+        "login_hint=rockshowholdings";
 
     /*
     window.open("https://accounts.google.com/o/oauth2/v2/auth?" +
@@ -163,13 +187,8 @@ function handleCredentialResponse(response) {
 }
 
 function logout() {
-    const token = gapi.client.getToken();
-    profile = null;
-    localStorage.profile = null;
-    if (token !== null) {
-        google.accounts.oauth2.revoke(token.access_token);
-        gapi.client.setToken('');
-    }
+    profile = {};
+    localStorage.removeItem("profile");
     document.getElementById("login").style.display = "flex";
     document.getElementById("content").style.display = "none";
 }

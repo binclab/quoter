@@ -15,13 +15,13 @@
 
 <body>
     <div id="login" style="display: flex; position:fixed; inset:0;align-items: center;justify-content: center;">
-        <!--button id="loginButton" type="button" onclick="login()" style="
+        <button id="loginButton" type="button" onclick="login()" style="
             display: flex; align-items: center; justify-content: space-evenly; 
             border: 1px solid darkgray; width: 100px; height: 32px;
             background-color: white; border-radius: 32px;}:active{
             background: darkseagreen;transition: all 0.8s;
             box-shadow: 2px 3px 1px 3px darkolivegreen, 4px 7px 3px 6px darkkhaki;">
-            <p>Login</p><svg version="1.1" style="height: 16px;" xmlns="http://www.w3.org/2000/svg"
+            <p>Login</p><svg id="googleImage" version="1.1" style="height: 16px;" xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 48 48">
                 <g>
                     <path fill="#EA4335"
@@ -39,8 +39,8 @@
                     <path fill="none" d="M0 0h48v48H0z"></path>
                 </g>
             </svg>
-        </button-->
-        <div id="googleLogin""></div-->
+        </button>
+        <!--div id="googleLogin""></div-->
     </div>
     <div id="content" style="display: none;">
         <nav id="navbar" style="overflow: hidden; background-color: darkslategray; 
@@ -62,7 +62,7 @@
                             background: darkseagreen;transition: all 0.8s;
                             box-shadow: 2px 3px 1px 3px darkolivegreen, 4px 7px 3px 6px darkkhaki;">
                         <p>Logout</p><svg version="1.1" style="height: 16px;" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 48 48">
+                            viewBox="0 0 48 48" transform="rotate(45 140 105)">
                             <g>
                                 <path fill="#EA4335"
                                     d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z">
@@ -153,10 +153,13 @@
             <hr>
         </div>
     </div>
-    <script async defer src="https://apis.google.com/js/api.js" onload="setupGoogleDrive()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="setupGoogleLogin()"></script>
+    <script async defer src="https://apis.google.com/js/api.js" onload=""></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload=""></script>
     <script>
-        //setupLogin();
+        if(localStorage.profile === undefined)
+            setupLogin();
+        //else
+        //    setupDashboard();
         var customerForm = document.querySelector("form#customerForm");
         customerForm.addEventListener("submit", submitCustomerInformation);
         populateQuotationTable();

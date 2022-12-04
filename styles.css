@@ -20,6 +20,14 @@
     background-color: lightslategray;
 }
 
+.spin {
+    animation-name: spin;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    /* linear | ease | ease-in | ease-out | ease-in-out */
+    animation-timing-function: linear;
+}
+
 #quotationTable {
     border-collapse: collapse;
     width: 100%;
@@ -55,4 +63,15 @@
     grid-template-columns: auto auto auto;
     background-color: silver;
     padding: 4px;
+}
+
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg)
+    }
+
+    to {
+        transform: rotate(360deg)
+    }
 }
