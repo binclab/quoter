@@ -9,8 +9,25 @@ var profile = localStorage.googleToken;
 let tokenClient;
 var execute;
 
+function setupLogin() {
+    let code = null;
+    try {
+        const array = code = window.location.href.split('?')[1].split('&')[0].split('=');
+        if (array[0] == "code")
+            code = array[1];
+    } finally {
+
+        //}
+        //if(code !== null && code[1].split('&') === 'code')
+        //    code = code[1].split('&');
+        //[0].split('=')[1]
+        //window.location.href.split('?')[1].split('&')[0].split('=')[1]
+    }
+}
+
+
 function setupGoogleLogin() {
-    execute = google.accounts.id.initialize({
+    google.accounts.id.initialize({
         client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
         auto_select: false,
         callback: handleCredentialResponse,
@@ -23,12 +40,33 @@ function setupGoogleLogin() {
     );
 
     /*
-    tokenClient = google.accounts.oauth2.initTokenClient({
+    fetch(url + token, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        },
+    }).then(response => response.json()).then(json => {
+        console.log(json.id === id);
+        if (json.id === id) {
+            profile = json;
+            profile.token = token;
+            localStorage.profile = JSON.stringify(profile);
+            document.getElementById("login").style.display = "none";
+            document.getElementById("content").style.display = "block";
+            document.getElementById("dashboard").style.display = "block";
+        } else {
+            alert("Use the Rock Show Gmail Account!");
+        }
+    });
+    */
+
+    /*tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
         scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive',
-        callback: '',
+        callback: 'handleLogin',
     });*/
-
+    /*
+ 
     if (profile !== 'null') {
         profile = JSON.parse(localStorage.googleToken);
         if (profile.email == "rockshowholdings@gmail.com") {
@@ -37,19 +75,42 @@ function setupGoogleLogin() {
             document.getElementById("dashboard").style.display = "block";
             //google.accounts.id.prompt();
         }
-    }
+    }*/
 }
 
 function setupGoogleDrive() {
-    gapi.load('client', async function () {
+    /*gapi.load('client', async function () {
         await gapi.client.init({
+            client_id: '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com',
             apiKey: 'AIzaSyDtkyr1CEHyR_doXiwV2sUTwHT9Xv85RO8',
             discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+            scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive',
+        }).then(function () {
+            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+            updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get())
         });
-    });
+    });*/
 }
 
 function login() {
+
+    window.location = "https://accounts.google.com/o/oauth2/v2/auth?" +
+        "response_type=code&" +
+        "client_id=167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com&" +
+        "scope=openid%20email%20https://www.googleapis.com/auth/drive&" +
+        "redirect_uri=http%3A//localhost:8000&" +
+        "login_hint=jsmith@example.com&" +
+        "nonce=0394852-3190485-2490358&";
+
+    /*
+    window.open("https://accounts.google.com/o/oauth2/v2/auth?" +
+        "response_type=code&" +
+        "client_id=167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com&" +
+        "scope=openid%20email%20https://www.googleapis.com/auth/drive&" +
+        "redirect_uri=http%3A//localhost:8000&" +
+        "login_hint=jsmith@example.com&" +
+        "nonce=0394852-3190485-2490358&");*/
+    /*
     var url = 'https://www.googleapis.com/oauth2/v2/userinfo?access_token=';
     tokenClient.callback = async (response) => {
         const token = response.access_token;
@@ -71,28 +132,24 @@ function login() {
                 alert("Use the Rock Show Gmail Account!");
             }
         });
-
+ 
         if (response.error !== undefined) {
             throw (response);
         }
-        //await listFiles();
-    };
+        //await listFiles();*/
 
-    if (gapi.client.getToken() === null) {
+    /*if (gapi.client.getToken() === null) {
         // Prompt the user to select a Google Account and ask for consent to share their data
         // when establishing a new session.
         tokenClient.requestAccessToken({ prompt: 'consent' });
     } else {
         // Skip display of account chooser and consent dialog for an existing session.
         tokenClient.requestAccessToken({ prompt: '' });
-    }
-}
-
-async function handleLogin(response) {
-    console.log(response);
+    }*/
 }
 
 function handleCredentialResponse(response) {
+    console.log('response');
     profile = decodeJwtResponse(response.credential);
     if (profile.email == "rockshowholdings@gmail.com") {
         localStorage.setItem("googleToken", JSON.stringify(profile));

@@ -40,7 +40,7 @@
                 </g>
             </svg>
         </button-->
-        <div id="googleLogin" style="align-self: center;"></div>
+        <div id="googleLogin""></div-->
     </div>
     <div id="content" style="display: none;">
         <nav id="navbar" style="overflow: hidden; background-color: darkslategray; 
@@ -156,6 +156,7 @@
     <script async defer src="https://apis.google.com/js/api.js" onload="setupGoogleDrive()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="setupGoogleLogin()"></script>
     <script>
+        //setupLogin();
         var customerForm = document.querySelector("form#customerForm");
         customerForm.addEventListener("submit", submitCustomerInformation);
         populateQuotationTable();
