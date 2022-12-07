@@ -1,58 +1,68 @@
-const endpoint = "https://oauth2.googleapis.com/";
+const endpoint = "https://oauth2.googleapis.com/token";
 const drive_end = 'https://www.googleapis.com/drive/v3/files';
 const sheets_end = 'https://sheets.googleapis.com/v4/spreadsheets';
+const docs_end = 'https://docs.googleapis.com/v1/documents'
 const client_id = '167979643861-c206l9c0vhor77mgveujailnleklgiad.apps.googleusercontent.com';
-const api_key = 'AIzaSyDtkyr1CEHyR_doXiwV2sUTwHT9Xv85RO8';
 const client_secret = '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';
+const scope = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive ' +
+    'openid profile email';
 const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const redirect_uri = "localhost:8000"
-const sub = "106525389156823461102";
 const quotations_id = '1VkcwZo_-E10aDjmeRBr91V0htphc__eE';
 let profile = {};
 let currentSheet;
+let tokenClient;
+let timerID;
+let timer;
 
 function setupLogin() {
     if (window.location.href.split('?')[1] === undefined) {
         document.getElementById("loginButton").style.display = "flex";
         document.getElementById("googleImage").setAttribute("class", "spin");
     }
-    try {
-        const array = window.location.href.split('?')[1].split('&')[0].split('=');
-        if (array[0] === "code" && array[1] !== null) {
-            fetch(endpoint + "token?grant_type=authorization_code&client_id=" +
-                client_id + "&client_secret=" + client_secret + "&redirect_uri=http%3A//" +
-                redirect_uri + "&code=" + array[1], {
-                method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' },
+
+    const array = window.location.href.split('?')[1]?.split('&')[0]?.split('=');
+    if (array != null && array[0] === "code" && array[1] !== null) {
+        fetch(endpoint + "?grant_type=authorization_code&client_id=" +
+            client_id + "&client_secret=" + client_secret + "&redirect_uri=http%3A//" +
+            redirect_uri + "&code=" + array[1], {
+            method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' },
+        }).then(response => response.json()).then(json => {
+            profile.access_token = json.access_token;
+            profile.id_token = json.id_token;
+            profile.refresh_token = json.refresh_token;
+            profile.expires_in = json.expires_in * 1000;
+            profile.save_time = new Date().getTime();
+            fetch(endpoint + "info?id_token=" + json.id_token, {
+                method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
             }).then(response => response.json()).then(json => {
-                profile.access_token = json.access_token;
-                profile.id_token = json.id_token;
-                profile.refresh_token = json.refresh_token;
-                profile.expires_in = json.expires_in;
-                profile.save_time = new Date().getTime();
-                fetch(endpoint + "tokeninfo?id_token=" + json.id_token, {
-                    method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
-                }).then(response => response.json()).then(json => {
-                    profile.email = json.email;
-                    profile.sub = json.sub;
-                    if (profile.sub === sub) {
-                        localStorage.profile = JSON.stringify(profile);
-                        setupDashboard();
-                    } else {
-                        alert("Use the Rock Show Gmail Account!");
+                profile.email = json.email;
+                profile.sub = json.sub;
+                fetch(docs_end + '/1Qvc-kCvvJOfr60aF_OwVzi71QtEu6rNeLY-KubeaTHQ', makeRequest('GET')
+                ).then(response => {
+                    if (response.ok)
+                        response.json().then(json => {
+                            profile.apiKey = json.body.content[1].paragraph.elements[0].textRun.content;
+                            localStorage.profile = JSON.stringify(profile);
+                            setupDashboard();
+                        });
+                    else {
+                        alert("This Account is not Allowed to login");
+                        document.getElementById("loginButton").style.display = "flex";
+                        document.getElementById("googleImage").setAttribute("class", "spin");
                     }
                 });
             });
-        }
-    } catch (error) { }
+        });
+    }
 }
 
-function setupDashboard() {
+async function setupDashboard() {
     profile = JSON.parse(localStorage.profile);
     document.getElementById("login").style.display = "none";
     document.getElementById("content").style.display = "block";
     document.getElementById("dashboard").style.display = "block";
-    try { checkToken(); } finally {
-        //setInterval(checkToken(), profile.expires_in * 1000);
+    if (await checkToken()) {
         createFile(new Date().getFullYear());
         createFile(new Date().toLocaleDateString('en-GB', { month: 'long' }));
         //updateSheet()
@@ -78,27 +88,27 @@ function logout() {
 }
 
 async function checkToken() {
-    let expired = new Date().getTime() - profile.save_time >= profile.expires_in * 1000;
-    if (expired) {
-        const request = await fetch(endpoint + 'token?grant_type=refresh_token&client_id=' +
-            client_id + '&client_secret=' + client_secret + '&refresh_token=' +
-            profile.refresh_token, {
-            method: 'POST', headers: { 'Accept': 'application/x-www-form-urlencoded' }
-        });
-        const response = await request.json();
-        profile.access_token = response.access_token;
-        profile.id_token = response.id_token;
-        profile.expires_in = response.expires_in;
-        profile.save_time = new Date().getTime();
-        localStorage.profile = JSON.stringify(profile);
-    }
-    return expired;
+    let status;
+    if (new Date().getTime() - profile.save_time >= profile.expires_in)
+        status = await fetch(endpoint + '?grant_type=refresh_token&client_id=' + client_id +
+            '&client_secret=' + client_secret + '&refresh_token=' + profile.refresh_token,
+            makeRequest('POST')).then(response => response.json()).then(json => {
+                profile.access_token = json.access_token;
+                profile.id_token = json.id_token;
+                profile.expires_in = json.expires_in * 1000;
+                profile.save_time = new Date().getTime();
+                localStorage.profile = JSON.stringify(profile);
+                return true;
+            });
+    else status = true;
+    if (timerID) clearTimeout(timerID);
+    timerID = setTimeout(checkToken, profile.expires_in - new Date().getTime() + profile.save_time);
+    return status;
 }
 
 async function createFile(name) {
     let parent = quotations_id;
     let type = 'application/vnd.google-apps.folder';
-    checkToken();
     if (name !== new Date().getFullYear()) {
         const request = await fetch(drive_end + '?q=%27' + quotations_id +
             '%27 in parents and name = %27' + new Date().getFullYear() +
@@ -143,29 +153,23 @@ async function fileExists(filter, parent) {
 }
 
 function listFiles() {
-    try {
-        checkToken();
-    } finally {
-        fetch('https://www.googleapis.com/drive/v3/files?q=%27' + quotations_id +
-            '%27 in parents and mimeType = %27application%2Fvnd.google-apps.spreadsheet%27',
-            makeRequest('GET')
-        ).then(response => response.json()).then(json => {
-            console.log(json);
-            json.files.forEach(function (file) {
-                console.log(file.name + " " + file.id);
-            });
+    fetch('https://www.googleapis.com/drive/v3/files?q=%27' + quotations_id +
+        '%27 in parents and mimeType = %27application%2Fvnd.google-apps.spreadsheet%27',
+        makeRequest('GET')
+    ).then(response => response.json()).then(json => {
+        console.log(json);
+        json.files.forEach(function (file) {
+            console.log(file.name + " " + file.id);
         });
-    }
+    });
 }
 
 function updateSheet(id, request) {
-    try { checkToken(); } finally {
-        fetch(sheets_end + '/' + id,
-            makeRequest('POST', {
-                'requests': [request],
-            })
-        );
-    }
+    fetch(sheets_end + '/' + id,
+        makeRequest('POST', {
+            'requests': [request],
+        })
+    );
 }
 
 async function getFileID(filter, parent) {
