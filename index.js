@@ -8,12 +8,11 @@ const scope = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/
     'openid profile email';
 const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const redirect_uri = "localhost:8000"
-const quotations_id = '1VkcwZo_-E10aDjmeRBr91V0htphc__eE';
+const quotations = '1VkcwZo_-E10aDjmeRBr91V0htphc__eE';
+const month = new Date().toLocaleDateString('en-GB', { month: 'long' });
 let profile = {};
 let currentSheet;
-let tokenClient;
 let timerID;
-let timer;
 
 function setupLogin() {
     if (window.location.href.split('?')[1] === undefined) {
@@ -23,6 +22,8 @@ function setupLogin() {
 
     const array = window.location.href.split('?')[1]?.split('&')[0]?.split('=');
     if (array != null && array[0] === "code" && array[1] !== null) {
+        document.getElementById("loginButton").style.display = "none";
+        document.getElementById("loading").style.display = "block";
         fetch(endpoint + "?grant_type=authorization_code&client_id=" +
             client_id + "&client_secret=" + client_secret + "&redirect_uri=http%3A//" +
             redirect_uri + "&code=" + array[1], {
@@ -60,11 +61,12 @@ function setupLogin() {
 async function setupDashboard() {
     profile = JSON.parse(localStorage.profile);
     document.getElementById("login").style.display = "none";
+    document.getElementById("loading").style.display = "none";
     document.getElementById("content").style.display = "block";
     document.getElementById("dashboard").style.display = "block";
     if (await checkToken()) {
-        createFile(new Date().getFullYear());
-        createFile(new Date().toLocaleDateString('en-GB', { month: 'long' }));
+        createFile(new Date().getFullYear(), 'application/vnd.google-apps.folder');
+        currentSheet = await createFile(month);
         //updateSheet()
         //setupFiles();
     }
@@ -87,6 +89,21 @@ function logout() {
     document.getElementById("googleImage").setAttribute("class", "spin");
 }
 
+function setupNewSheet(sheetID) {
+    updateSheet(sheetID, {
+        'updateSpreadsheetProperties': {
+            'properties': {
+                'title': month,
+            },
+            'fields': 'title',
+        }, 'addSheet': {
+            'properties': { 'title': 'Customers', },
+            'gridProperties': { 'columnCount': 6, 'frozenRowCount': 1, },
+            'fields': 'columnCount,frozenRowCount',
+        },
+    });
+}
+
 async function checkToken() {
     let status;
     if (new Date().getTime() - profile.save_time >= profile.expires_in)
@@ -102,47 +119,36 @@ async function checkToken() {
             });
     else status = true;
     if (timerID) clearTimeout(timerID);
-    timerID = setTimeout(checkToken, profile.expires_in - new Date().getTime() + profile.save_time);
+    const timeout = profile.expires_in - new Date().getTime() + profile.save_time;
+    timerID = setTimeout(checkToken, timeout);
     return status;
 }
 
-async function createFile(name) {
-    let parent = quotations_id;
-    let type = 'application/vnd.google-apps.folder';
+async function createFile(name, type = 'application/vnd.google-apps.spreadsheet') {
+    let parent = quotations
+    let id = '0';
     if (name !== new Date().getFullYear()) {
-        const request = await fetch(drive_end + '?q=%27' + quotations_id +
+        const request = await fetch(drive_end + '?q=%27' + quotations +
             '%27 in parents and name = %27' + new Date().getFullYear() +
             '%27', makeRequest('GET'));
         const list = await request.json();
         parent = list.files[0].id;
-        type = 'application/vnd.google-apps.spreadsheet';
-        if (!await fileExists('mimeType = %27' + type + '%27 and name = %27' + name + '%27',
-            parent)) {
-            const request = await fetch(drive_end, makeRequest('POST', {
-                'name': name, 'mimeType': type, 'parents': [parent],
-            }));
-            const list = await request.json();
-            updateSheet(list.id, {
-                'updateSpreadsheetProperties': {
-                    'properties': { 'title': name, },
-                    'fields': 'title',
-                }, 'addSheet': {
-                    'properties': { 'title': 'Customers', },
-                    'gridProperties': { 'columnCount': 6, 'frozenRowCount': 1, },
-                    'fields': 'columnCount,frozenRowCount',
-                },
-            });
-        }
     }
-    if (!await fileExists('name = %27' + name + '%27', parent)) {
-        fetch(drive_end, makeRequest('POST', {
-            'name': name,
-            'mimeType': type,
-            'parents': [parent],
-        })).then(response => {
-            console.log(response);
-        });
+    if (!await fileExists('mimeType = %27' + type + '%27 and name = %27' + name + '%27',
+        parent)) {
+        const request = await fetch(drive_end, makeRequest('POST', {
+            'name': name, 'mimeType': type, 'parents': [parent],
+        }));
+        const list = await request.json();
+        id = list.id;
+        if (name === month)
+            setupNewSheet(list.id);
     }
+    if (name === month) {
+        id = await getFileID('mimeType = %27' + type + '%27 and name = %27' +
+            name + '%27', parent)
+    }
+    return id;
 }
 
 async function fileExists(filter, parent) {
@@ -153,7 +159,7 @@ async function fileExists(filter, parent) {
 }
 
 function listFiles() {
-    fetch('https://www.googleapis.com/drive/v3/files?q=%27' + quotations_id +
+    fetch('https://www.googleapis.com/drive/v3/files?q=%27' + quotations +
         '%27 in parents and mimeType = %27application%2Fvnd.google-apps.spreadsheet%27',
         makeRequest('GET')
     ).then(response => response.json()).then(json => {
