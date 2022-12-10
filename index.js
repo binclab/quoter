@@ -9,7 +9,6 @@ const scope = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/
 const discovery_docs = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const redirect_uri = "localhost:8000"
 const quotations = '1VkcwZo_-E10aDjmeRBr91V0htphc__eE';
-const month = new Date().toLocaleDateString('en-GB', { month: 'long' });
 let profile = {};
 let currentSheet;
 let timerID;
@@ -39,6 +38,8 @@ function setupLogin() {
             }).then(response => response.json()).then(json => {
                 profile.email = json.email;
                 profile.sub = json.sub;
+                profile.name = json.given_name;
+                profile.picture = json.picture;
                 fetch(docs_end + '/1Qvc-kCvvJOfr60aF_OwVzi71QtEu6rNeLY-KubeaTHQ', makeRequest('GET')
                 ).then(response => {
                     if (response.ok)
@@ -59,17 +60,21 @@ function setupLogin() {
 }
 
 async function setupDashboard() {
+    const startTime = new Date().getTime();
     profile = JSON.parse(localStorage.profile);
     document.getElementById("login").style.display = "none";
     document.getElementById("loading").style.display = "none";
     document.getElementById("content").style.display = "block";
     document.getElementById("dashboard").style.display = "block";
     if (await checkToken()) {
+        document.getElementById("userName").innerHTML = 'Logout ' + profile.name;
+        document.getElementById("userPicture").src = profile.picture;
         createFile(new Date().getFullYear(), 'application/vnd.google-apps.folder');
-        currentSheet = await createFile(month);
+        currentSheet = await createFile(new Date().toLocaleDateString('en-GB', { month: 'long' }));
         //updateSheet()
         //setupFiles();
     }
+    console.log((new Date().getTime() - startTime) / 60);
 }
 
 function login() {
@@ -90,18 +95,48 @@ function logout() {
 }
 
 function setupNewSheet(sheetID) {
-    updateSheet(sheetID, {
-        'updateSpreadsheetProperties': {
-            'properties': {
-                'title': month,
+    updateSheet(sheetID, [{
+        updateSpreadsheetProperties: {
+            properties: {
+                title: new Date().toLocaleDateString('en-GB', { month: 'long' }),
             },
-            'fields': 'title',
-        }, 'addSheet': {
-            'properties': { 'title': 'Customers', },
-            'gridProperties': { 'columnCount': 6, 'frozenRowCount': 1, },
-            'fields': 'columnCount,frozenRowCount',
+            fields: 'title'
+        }
+    }, {
+        updateSheetProperties: {
+            properties: {
+                title: 'Customers',
+                gridProperties: { rowCount: 1, columnCount: 9 }
+            },
+            fields: 'title,gridProperties.rowCount,gridProperties.columnCount'
         },
-    });
+    }, {
+        updateCells: {
+            rows: [{
+                values: [
+                    { userEnteredValue: { stringValue: 'ID' } },
+                    { userEnteredValue: { stringValue: 'Name' } },
+                    { userEnteredValue: { stringValue: 'Surname' } },
+                    { userEnteredValue: { stringValue: 'Phone Number' } },
+                    { userEnteredValue: { stringValue: 'Whatsapp' } },
+                    { userEnteredValue: { stringValue: 'Email' } },
+                    { userEnteredValue: { stringValue: 'Location' } },
+                    { userEnteredValue: { stringValue: 'Date' } },
+                    { userEnteredValue: { stringValue: 'Done' } },
+                ]
+            }],
+            fields: 'userEnteredValue',
+            range: { sheetId: 0 }
+        }
+    }]);
+}
+
+async function getSheetInformation(id = currentSheet) {
+    const request = await fetch(sheets_end + '/' + id, makeRequest('GET'));
+    const data = await request.json();
+    const properties = data.properties;
+    const sheets = data.sheets
+    return { properties, sheets };
 }
 
 async function checkToken() {
@@ -141,10 +176,10 @@ async function createFile(name, type = 'application/vnd.google-apps.spreadsheet'
         }));
         const list = await request.json();
         id = list.id;
-        if (name === month)
+        if (name === new Date().toLocaleDateString('en-GB', { month: 'long' }))
             setupNewSheet(list.id);
     }
-    if (name === month) {
+    if (name === new Date().toLocaleDateString('en-GB', { month: 'long' })) {
         id = await getFileID('mimeType = %27' + type + '%27 and name = %27' +
             name + '%27', parent)
     }
@@ -170,10 +205,10 @@ function listFiles() {
     });
 }
 
-function updateSheet(id, request) {
-    fetch(sheets_end + '/' + id,
+function updateSheet(id = currentSheet, requests) {
+    fetch(sheets_end + '/' + id + '/:batchUpdate',
         makeRequest('POST', {
-            'requests': [request],
+            'requests': requests,
         })
     );
 }
@@ -217,11 +252,52 @@ function openTab(event, tabName) {
     event.currentTarget.className += " active";
 }
 
-async function submitCustomerInformation(event) {
+function submitCustomerInformation(event) {
     event.preventDefault();
     const data = new FormData(event.target);
-    const value = data.get('firstname');
-    console.log({ value });
+    fetch(sheets_end + '/' + currentSheet, makeRequest('GET')).then(response =>
+        response.json()).then(json => {
+            let rowCount = json.sheets[0].properties.gridProperties.rowCount;
+            if (rowCount === 2) {
+                updateSheet(currentSheet, [{
+                    updateSheetProperties: {
+                        properties: {
+                            gridProperties: { frozenRowCount: 1 }
+                        },
+                        fields: 'gridProperties.frozenRowCount'
+                    }
+                }]);
+            }
+
+            updateSheet(currentSheet, [{
+                appendCells: {
+                    rows: [{
+                        values: [
+                            { userEnteredValue: { numberValue: rowCount } },
+                            { userEnteredValue: { stringValue: data.get('name') } },
+                            { userEnteredValue: { stringValue: data.get('surname') } },
+                            {
+                                userEnteredValue: {
+                                    numberValue: data.get('phonenumber') === '' ?
+                                        null : data.get('phonenumber')
+                                }
+                            },
+                            {
+                                userEnteredValue: {
+                                    numberValue: data.get('whatsapp') === '' ?
+                                        null : data.get('whatsapp')
+                                }
+                            },
+                            { userEnteredValue: { stringValue: data.get('email') } },
+                            { userEnteredValue: { stringValue: data.get('location') } },
+                            { userEnteredValue: { numberValue: new Date().getTime() } },
+                            { userEnteredValue: { boolValue: false } }
+                        ]
+                    }],
+                    fields: 'userEnteredValue'
+                }
+            }]);
+        });
     openTab(event, "manage");
     document.getElementById("resetButton").click();
 }

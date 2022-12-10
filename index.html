@@ -15,7 +15,8 @@
 
 <body>
     <div id="login" style="display: flex; position:fixed; inset:0;align-items: center;justify-content: center;">
-        <button id="loginButton" class="button" type="button" onclick="login()">
+        <button id="loginButton" class="button" type="button" onclick="login()"
+            style="width: 100px;">
             <p>Login</p><img id="googleImage" src="google.svg" type="image/svg+xml" width="16px" height="16px"
                 alt="Google Icon"></img>
         </button>
@@ -33,9 +34,10 @@
             <div style="position: fixed; left: 8px; right: 8px;">
                 <div style="display: flex; justify-content: space-between;align-items: center;">
                     <h2>Dashboard</h2>
-                    <button id="logoutButton" class="button" type="button" onclick="logout()">
-                        <p>Logout</p><img src="google.svg" type="image/svg+xml" width="16px" height="16px"
-                            alt="Google Icon"></img>
+                    <button class="button" type="button" onclick="logout()"
+                        style="width: 128px;">
+                        <p id="userName"></p>
+                        <img id="userPicture" width="16px" height="16px" alt="Profile Picture"></img>
                     </button>
                 </div>
                 <hr>
@@ -80,25 +82,23 @@
             <form id="customerForm" action="" class="grid-container" method="get" autocomplete="on"
                 style="row-gap: 16px;">
                 <div class="grid-item" style="grid-column: 1/span 2;">
-                    <label for="firstname">First name:</label><br>
-                    <input type="text" id="firstname" name="firstname" placeholder="John" required><br>
-                    <label for="lastname">Last name:</label><br>
-                    <input type="text" id="lastname" name="lastname" placeholder="Doe">
+                    <label for="name">Name:</label><br>
+                    <input type="text" name="name" placeholder="John" required><br>
+                    <label for="surname">Surname:</label><br>
+                    <input type="text" name="surname" placeholder="Doe">
                 </div>
                 <div class="grid-item" style="grid-column: 3/span 2;">
                     <label for="phonenumber">Phone Number:</label><br>
-                    <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="phonenumber" name="phonenumber" maxlength="8"
+                    <input type="tel" pattern="[7]{1}[1-8]{1}[0-9]{6}" name="phonenumber" maxlength="8"
                         placeholder="71234567">
-                    <small>Format: 71234567</small><br>
-                    <label for="lname">Whatsapp Number:</label><br>
-                    <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" id="lname" name="lname" maxlength="8">
-                    <small>Format: 71234567</small>
+                    <label for="whatsapp">Whatsapp Number:</label><br>
+                    <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" name="whatsapp" maxlength="8">
                 </div>
                 <div class="grid-item" style="grid-column: 5/span 2;">
-                    <label for="fname">Email:</label><br>
-                    <input type="email" id="fname" name="fname"><br>
-                    <label for="lname">Location:</label><br>
-                    <input type="text" id="lname" name="lname">
+                    <label for="email">Email:</label><br>
+                    <input type="email" name="email"><br>
+                    <label for="location">Location:</label><br>
+                    <input type="text" name="location">
                 </div>
                 <input id="resetButton" type="reset" style="grid-column: 1/span 1;">
                 <button type="submit" style="grid-column: 5/span 1;">Submit</button>
