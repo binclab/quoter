@@ -11,111 +11,133 @@
     <title>Quoter</title>
     <link rel="stylesheet" href="styles.css" type="text/css">
     <script src="index.js" type="text/javascript"></script>
+    <script src="engine.js" type="text/javascript"></script>
+    <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/3.4.2/gl-matrix-min.js"></script>
 </head>
 
 <body>
+    <div id="application" style="display: none;">
+        <nav id="header"
+            style="overflow: hidden; background-color: darkslategray; position: fixed; top: 0px; left: 8px; right: 8px;">
+            <button type="button" onclick="openTab(event, 'dashboard')">Dashboard</button>
+            <button type="button" onclick="openTab(event, 'manage', 'block')">Manage</button>
+            <button type="button" onclick="openTab(event, 'create')">Create</button>
+            <button type="button" onclick="logout()" style="display:flex; width: 128px;float: right;align-items: center;
+                justify-content: space-evenly;">
+                <p id="userName" style="float: left;padding-right: 4px;"></p>
+                <img id="userPicture" width=24px height=24px alt="Profile Picture"></img>
+            </button>
+        </nav>
+        <div id="content" style="position:fixed;left:8px;right:8px;top:40px;bottom: 40px;">
+            <div id="dashboard" style="display:none;align-items: stretch;justify-content: space-between;">
+                <div>
+                    <h4>Pending Quotations</h4>
+                    <table id="pendingQuotations">
+                        <tr style="height: 32px;">
+                            <th style="width: 24px;">ID</th>
+                            <th style="width: 128px;">Name</th>
+                            <th style="width: 128px;">Overdue Time</th>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <h4>Create a new Quotation</h4>
+                    <form id="customerForm" action="" method="get" autocomplete="on" style="display: grid; grid-template-columns: auto auto; 
+                        background-color: darkslategrey;color:cornsilk;font-weight: bold;padding: 8px;row-gap: 16px;">
+                        <div><label for="name">Name</label><br>
+                            <input type="text" name="name" placeholder="John" required><br>
+                        </div>
+                        <div>
+                            <label for="surname">Surname</label><br>
+                            <input type="text" name="surname" placeholder="Doe">
+                        </div>
+                        <div>
+                            <label for="phonenumber">Phone Number</label><input type="checkbox"
+                                style="float: right;visibility: hidden;"><br>
+                            <input id="phoneInput" type="tel" pattern="[7]{1}[1-8]{1}[0-9]{6}" name="phonenumber"
+                                maxlength="8" placeholder="71234567">
+                        </div>
+                        <div>
+                            <label for="whatsapp">Whatsapp Number</label><input id="whatsappCheck" type="checkbox"
+                                style="float: right" onclick="checkWhatsapp()"><br>
+                            <input id="whatsappInput" type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" name="whatsapp"
+                                maxlength="8" disabled>
+                        </div>
+                        <div>
+                            <label for="email">Email</label><br>
+                            <input type="email" name="email"><br>
+                        </div>
+                        <div>
+                            <label for="location">Location</label><br>
+                            <input type="text" name="location">
+                        </div>
+                        <input id="resetButton" type="reset">
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="manage" style="display:none;">
+                <div style="padding: 4px 8px">
+                    <input type="text" id="quotationSearch" onkeyup="filterQuotations()"
+                        placeholder="Search for a quotation ..." title="Type in a or number">
+                </div>
+                <table id="quotationTable" style="width: 100%;">
+                    <tr class="header">
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Surname</th>
+                        <th>Phone</th>
+                        <th>Whatsapp</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th>Date of Entry</th>
+                        <th>Status</th>
+                    </tr>
+                </table>
+                <div class="grid-item" style="padding-top: 8px">
+                    <label for="sorter">Sort table by:</label>
+                    <select name="sorter" id="sorter">
+                        <optgroup label="Date">
+                            <option value="ascending">Ascending Date</option>
+                            <option value="descending">Descending Date</option>
+                        </optgroup>
+                        <optgroup label="Status">
+                            <option value="ascending">Ascending Status</option>
+                            <option value="descending">Descending Status</option>
+                        </optgroup>
+                    </select>
+                    <button onclick="sortQuotationTable()">Sort</button>
+                </div>
+            </div>
+
+            <div id="create" style="display:none;align-items: stretch;justify-content: space-between;">
+                <div style="width: 256px;">button</div>
+                <canvas id="canvas"
+                    style="display:flex;align-self:stretch;height:480px;width:640px;border:1px solid darkslategrey;"></canvas>
+            </div>
+
+        </div>
+    </div>
+    <nav id=" footer"
+        style="overflow: hidden; background-color: darkslategray; position: fixed; bottom: 0px; left: 8px;right: 8px;">
+        <input src="sync.svg" type="image" wialign-items: stretch;justify-content: space-between;dth=24px height=24px
+            alt="Syncronize" style="float: right;" onclick="clickme()" />
+    </nav>
+    </div>
     <div id="login" style="display: flex; position:fixed; inset:0;align-items: center;justify-content: center;">
-        <button id="loginButton" class="button" type="button" onclick="login()"
-            style="width: 100px;">
+        <button id="loginButton" class="button" type="button" onclick="login()" style="width: 100px;">
             <p>Login</p><img id="googleImage" src="google.svg" type="image/svg+xml" width="16px" height="16px"
                 alt="Google Icon"></img>
         </button>
         <img id="loading" src="loader.svg" type="image/svg+xml" alt="Loading Image" style="display: none;"></img>
-    </div>
-    <div id="content" style="display: none;">
-        <nav class="navbar">
-            <button class="navbuttons active" onclick="openTab(event, 'dashboard')">Dashboard</button>
-            <button class="navbuttons" onclick="openTab(event, 'manage')">Manage</button>
-            <button class="navbuttons" onclick="openTab(event, 'create')">Create</button>
-            <button class="navbuttons" onclick="openTab(event, 'configuration')"
-                style="float:right;">Configuration</button>
-        </nav>
-        <div id="dashboard" class="tabcontent">
-            <div style="position: fixed; left: 8px; right: 8px;">
-                <div style="display: flex; justify-content: space-between;align-items: center;">
-                    <h2>Dashboard</h2>
-                    <button class="button" type="button" onclick="logout()"
-                        style="width: 128px;">
-                        <p id="userName"></p>
-                        <img id="userPicture" width="16px" height="16px" alt="Profile Picture"></img>
-                    </button>
-                </div>
-                <hr>
-            </div>
-        </div>
-
-        <div id="manage" class="tabcontent">
-            <h2>Quotations</h2>
-            <hr>
-            <div style="padding-left: 32px; padding-bottom: 4px">
-                <input type="text" id="quotationSearch" onkeyup="filterQuotations()"
-                    placeholder="Search for a quotation ..." title="Type in a or number">
-            </div>
-            <table id="quotationTable">
-                <tr class="header">
-                    <th>Name</th>
-                    <th>Surname</th>
-                    <th>Contacts</th>
-                    <th>Date of Entry</th>
-                    <th>Status</th>
-                </tr>
-            </table>
-            <div class="grid-item" style="padding-top: 8px">
-                <label for="sorter">Sort table by:</label>
-                <select name="sorter" id="sorter">
-                    <optgroup label="Date">
-                        <option value="ascending">Ascending Date</option>
-                        <option value="descending">Descending Date</option>
-                    </optgroup>
-                    <optgroup label="Status">
-                        <option value="ascending">Ascending Status</option>
-                        <option value="descending">Descending Status</option>
-                    </optgroup>
-                </select>
-                <button onclick="sortQuotationTable()">Sort</button>
-            </div>
-        </div>
-
-        <div id="create" class="tabcontent">
-            <h2>Customer Information</h2>
-            <hr>
-            <form id="customerForm" action="" class="grid-container" method="get" autocomplete="on"
-                style="row-gap: 16px;">
-                <div class="grid-item" style="grid-column: 1/span 2;">
-                    <label for="name">Name:</label><br>
-                    <input type="text" name="name" placeholder="John" required><br>
-                    <label for="surname">Surname:</label><br>
-                    <input type="text" name="surname" placeholder="Doe">
-                </div>
-                <div class="grid-item" style="grid-column: 3/span 2;">
-                    <label for="phonenumber">Phone Number:</label><br>
-                    <input type="tel" pattern="[7]{1}[1-8]{1}[0-9]{6}" name="phonenumber" maxlength="8"
-                        placeholder="71234567">
-                    <label for="whatsapp">Whatsapp Number:</label><br>
-                    <input type="tel" pattern="[7]{1}[1-7]{1}[0-9]{6}" name="whatsapp" maxlength="8">
-                </div>
-                <div class="grid-item" style="grid-column: 5/span 2;">
-                    <label for="email">Email:</label><br>
-                    <input type="email" name="email"><br>
-                    <label for="location">Location:</label><br>
-                    <input type="text" name="location">
-                </div>
-                <input id="resetButton" type="reset" style="grid-column: 1/span 1;">
-                <button type="submit" style="grid-column: 5/span 1;">Submit</button>
-            </form>
-        </div>
-
-        <div id="configuration" class="tabcontent">
-            <h2>Configuration</h2>
-            <hr>
-        </div>
     </div>
     <script type="text/javascript">
         if (localStorage.profile === undefined) setupLogin();
         else setupDashboard();
         var customerForm = document.querySelector("form#customerForm");
         customerForm.addEventListener("submit", submitCustomerInformation);
-        populateQuotationTable();
+        webgl = getWebGL();
     </script>
 </body>
 

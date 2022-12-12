@@ -1,32 +1,77 @@
-.navbar {
-    overflow: hidden;
-    background-color: darkslategray;
-    position: fixed;
-    top: 0px;
-    left: 8px;
-    right: 8px;
+table {
+    border-collapse: collapse;
+    border: 1px solid dimgray;
+    font-size: 18px;
+    overflow-y: scroll;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-.navbuttons {
+th {
+    text-align: left;
+    padding: 4px;
+    border: 3px inset gainsboro;
+    color: white;
+    background-color: darkslategray;
+}
+
+td {
+    text-align: left;
+    padding: 4px;
+    border: 3px solid whitesmoke;
+    color: white;
+}
+
+h2,
+h4 {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+nav button {
+    height: 40px;
+}
+
+nav button,
+nav input {
     float: left;
     display: block;
     color: linen;
+    font-family: Serif;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px;
     background-color: inherit;
     text-align: center;
     border: none;
     outline: none;
     cursor: pointer;
     text-decoration: none;
-    padding: 12px;
     transition: 0.3s;
 }
 
-.navbuttons:hover {
+nav button:hover,
+nav input:hover {
     background-color: dimgray;
 }
 
-.navbuttons.active {
+nav button.active,
+nav input:active {
     background-color: lightslategray;
+}
+
+.done {
+    background-color: seagreen;
+}
+
+.pending {
+    background-color: crimson;
+}
+
+.done:hover,
+.pending:hover {
+    cursor: pointer;
+    background-color: darkslategray;
 }
 
 .button {
@@ -52,44 +97,6 @@
     animation-timing-function: linear;
 }
 
-#quotationTable {
-    border-collapse: collapse;
-    width: 100%;
-    border: 1px solid dimgray;
-    font-size: 18px;
-    overflow-y: scroll;
-}
-
-#quotationTable th,
-#quotationTable td {
-    text-align: left;
-    padding: 12px;
-    width: 30px;
-}
-
-#quotationTable tr {
-    border-bottom: 1px solid tomato;
-}
-
-#quotationTable tr.header,
-#quotationTable tr:hover {
-    background-color: #f1f1f1;
-}
-
-.tabcontent {
-    display: none;
-    margin-top: 25px;
-    padding: 8px;
-}
-
-.grid-container {
-    display: grid;
-    grid-template-columns: auto auto auto;
-    background-color: silver;
-    padding: 4px;
-}
-
-
 @keyframes spin {
     from {
         transform: rotate(0deg)
@@ -99,15 +106,3 @@
         transform: rotate(360deg)
     }
 }
-
-@keyframes loading {
-    0% {
-      opacity: 1;
-      backface-visibility: hidden;
-      transform: translateZ(0) scale(1.5,1.5);
-    } 100% {
-      opacity: 0;
-      backface-visibility: hidden;
-      transform: translateZ(0) scale(1,1);
-    }
-  }

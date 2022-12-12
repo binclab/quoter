@@ -12,6 +12,7 @@ const quotations = '1VkcwZo_-E10aDjmeRBr91V0htphc__eE';
 let profile = {};
 let currentSheet;
 let timerID;
+let webgl;
 
 function setupLogin() {
     if (window.location.href.split('?')[1] === undefined) {
@@ -22,7 +23,7 @@ function setupLogin() {
     const array = window.location.href.split('?')[1]?.split('&')[0]?.split('=');
     if (array != null && array[0] === "code" && array[1] !== null) {
         document.getElementById("loginButton").style.display = "none";
-        document.getElementById("loading").style.display = "block";
+        document.getElementById("loading").style.display = "flex";
         fetch(endpoint + "?grant_type=authorization_code&client_id=" +
             client_id + "&client_secret=" + client_secret + "&redirect_uri=http%3A//" +
             redirect_uri + "&code=" + array[1], {
@@ -62,16 +63,17 @@ function setupLogin() {
 async function setupDashboard() {
     const startTime = new Date().getTime();
     profile = JSON.parse(localStorage.profile);
-    document.getElementById("login").style.display = "none";
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("content").style.display = "block";
-    document.getElementById("dashboard").style.display = "block";
+    document.getElementById("login").style.display = 'none';
+    document.getElementById("loading").style.display = 'none';
+    document.getElementById("application").style.display = "flex";
+    document.getElementById("dashboard").style.display = 'flex';
+    document.getElementById('header').children[0].className = 'active';
     if (await checkToken()) {
         document.getElementById("userName").innerHTML = 'Logout ' + profile.name;
         document.getElementById("userPicture").src = profile.picture;
         createFile(new Date().getFullYear(), 'application/vnd.google-apps.folder');
         currentSheet = await createFile(new Date().toLocaleDateString('en-GB', { month: 'long' }));
-        //updateSheet()
+        setupTables();
         //setupFiles();
     }
     console.log((new Date().getTime() - startTime) / 60);
@@ -89,7 +91,7 @@ function logout() {
     localStorage.removeItem("profile");
     profile = {};
     document.getElementById("login").style.display = "flex";
-    document.getElementById("content").style.display = "none";
+    document.getElementById("application").style.display = "none";
     document.getElementById("loginButton").style.display = "flex";
     document.getElementById("googleImage").setAttribute("class", "spin");
 }
@@ -232,24 +234,18 @@ function makeRequest(method, body) {
     }
 }
 
-function openTab(event, tabName) {
-    // Declare all variables
-    var i, tabcontent, navbuttons;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+function openTab(event, tabName, type = 'flex') {
+    const tabs = document.getElementById('content').children;
+    for (let i = 0; i < tabs.length; i++) {
+        tabs[i].style.display = "none";
     }
 
-    navbuttons = document.getElementsByClassName("navbuttons");
-    for (i = 0; i < navbuttons.length; i++) {
-        navbuttons[i].className = navbuttons[i].className.replace(" active", "");
+    const navbuttons = document.getElementById('header').children;
+    for (let i = 0; i < navbuttons.length; i++) {
+        navbuttons[i].className = '';
     }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(tabName).style.display = "block";
-    event.currentTarget.className += " active";
+    document.getElementById(tabName).style.display = type;
+    event.currentTarget.className = "active";
 }
 
 function submitCustomerInformation(event) {
@@ -290,32 +286,57 @@ function submitCustomerInformation(event) {
                             },
                             { userEnteredValue: { stringValue: data.get('email') } },
                             { userEnteredValue: { stringValue: data.get('location') } },
-                            { userEnteredValue: { numberValue: new Date().getTime() } },
+                            {
+                                userEnteredValue: {
+                                    numberValue: new Date().getTime() / 86400000 + 25569
+                                },
+                                userEnteredFormat: {
+                                    numberFormat: {
+                                        type: "DATE_TIME", pattern: "ddd dd hh:mm"
+                                    }
+                                }
+                            },
                             { userEnteredValue: { boolValue: false } }
                         ]
                     }],
-                    fields: 'userEnteredValue'
+                    fields: 'userEnteredValue, userEnteredFormat.numberFormat'
                 }
             }]);
         });
-    openTab(event, "manage");
-    document.getElementById("resetButton").click();
+    openTab(event, 'create');
+    document.getElementById('resetButton').click();
 }
 
-function populateQuotationTable() {
-    const table = document.getElementById("quotationTable");
-    const request = new XMLHttpRequest();
-    request.onload = function () {
-        //const data = JSON.parse(this.responseText);
-        //console.log(data.id);
-    }
-    years.forEach(function (year) {
-        months.forEach(function (month) {
-            request.open("GET", "data/" + year + "/" + month + ".json", true);
-            if (request.status != 404)
-                request.send();
-        })
-    })
+function setupTables(sheetID = currentSheet) {
+    fetch(sheets_end + '/' + sheetID + '/values/Customers!A2:I', makeRequest('GET'))
+        .then(response => response.json()).then(json => {
+            const pending = document.getElementById('pendingQuotations');
+            const table = document.getElementById('quotationTable');
+            json.values.forEach(function (data) {
+                const row = table.insertRow(-1);
+                row.className = 'done';
+                for (let i = 0; i < 9; i++) {
+                    if (i === 0) {
+                        row.onclick = function () {
+                            console.log(data[i]);
+                        }
+                        row.insertCell(i).innerHTML = data[i];
+                    } else if (i === 8 && data[8] === 'FALSE') {
+                        const prow = pending.insertRow(-1);
+                        prow.insertCell(0).innerHTML = data[0];
+                        prow.insertCell(1).innerHTML = data[1];
+                        prow.insertCell(2).innerHTML = data[7];
+                        prow.onclick = function () {
+                            console.log(data[0]);
+                        }
+                        prow.className = 'pending';
+                        row.className = 'pending';
+                        row.insertCell(i).innerHTML = "PENDING";
+                    } else if (i === 8) row.insertCell(i).innerHTML = "DONE";
+                    else row.insertCell(i).innerHTML = data[i];
+                }
+            });
+        });
 }
 
 function filterQuotations() {
@@ -371,3 +392,16 @@ function sortQuotationTable() {
         }
     }
 }
+
+function checkWhatsapp() {
+    const whatsappInput = document.getElementById('whatsappInput');
+    if (document.getElementById('whatsappCheck').checked) {
+        whatsappInput.disabled = false;
+        whatsappInput.value = document.getElementById('phoneInput').value;
+    } else {
+        whatsappInput.disabled = true;
+        whatsappInput.value = null;
+    }
+}
+
+function clickme() { console.log('ffffff'); }
