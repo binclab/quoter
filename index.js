@@ -62,7 +62,10 @@ function setupLogin() {
 
 async function setupDashboard() {
     const startTime = new Date().getTime();
+    webgl = document.getElementById('canvas').getContext('webgl');
     profile = JSON.parse(localStorage.profile);
+    initWebGL();
+    webgl.drawArrays(webgl.TRIANGLES, 0, 3);
     document.getElementById("login").style.display = 'none';
     document.getElementById("loading").style.display = 'none';
     document.getElementById("application").style.display = "flex";
